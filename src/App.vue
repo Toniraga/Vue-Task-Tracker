@@ -1,46 +1,60 @@
 <template>
   <div class="container">
-    <Header title="Hello Task Tracker" />
-    <Tasks :tasks="tasks" />
+    <Header @toggle-add-task="toggleAddTask" title="Hello Task Tracker" :showAddTask="showAddTask" />
+    <div v-show="showAddTask">
+      <AddTask @add-task="addTask" />
+    </div>
+    <Tasks @toggle-reminder="toggleReminder" @delete-task="deleteTask" :tasks="tasks" />
   </div>
 </template>
 
 <script>
 import Header from './components/Header';
 import Tasks from './components/Tasks';
+import AddTask from './components/AddTask';
 
 export default {
   name: 'App',
   components: {
     Header,
-    Tasks
+    Tasks,
+    AddTask,
   },
   data() {
     return {
-      tasks: []
+      tasks: [],
+      showAddTask: false
     }
   },
-  created() {
-    this.tasks = [
-      {
-        id: 1,
-        text: 'Doctor\'s Appointment',
-        day: 'March 1st at 2:30pm',
-        reminder: true,
-      },
-      {
-        id: 2,
-        text: 'Meeting at School',
-        day: 'March 4th at 9:30pm',
-        reminder: true,
-      },
-      {
-        id: 3,
-        text: 'Dick Appointment',
-        day: 'March 2nd at 2:30pm',
-        reminder: true,
-      },
-    ]
+  methods: {
+    addTask(newTask) {
+      this.tasks = [...this.tasks, newTask]
+    },
+    deleteTask(id) {
+      if (confirm('Are you sure?')) {
+        this.tasks = this.tasks.filter((task) => task.id !== id)
+      }
+    },
+    toggleReminder(id) {
+      this.tasks = this.tasks.map((task) => task.id === id ? {...task, reminder: !task.reminder} : task)
+    },
+    toggleAddTask() {
+      this.showAddTask = !this.showAddTask;
+    },
+    async fetchTasks() {
+      const res = await fetch('api/tasks')
+      const data = await res.json()
+      return data;
+    },
+    async fetchSingleTask(id) {
+      const res = await fetch(`api/tasks/${id}`)
+      const data = await res.json()
+      return data;
+    }
+  },
+  async created() {
+    const data = await this.fetchTasks()
+    this.tasks = data;
   }
 }
 </script>
