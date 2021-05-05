@@ -1,60 +1,30 @@
 <template>
   <div class="container">
     <Header @toggle-add-task="toggleAddTask" title="Hello Task Tracker" :showAddTask="showAddTask" />
-    <div v-show="showAddTask">
-      <AddTask @add-task="addTask" />
-    </div>
-    <Tasks @toggle-reminder="toggleReminder" @delete-task="deleteTask" :tasks="tasks" />
+    <router-view :showAddTask="showAddTask"></router-view>
+    <Footer />
   </div>
 </template>
 
 <script>
 import Header from './components/Header';
-import Tasks from './components/Tasks';
-import AddTask from './components/AddTask';
+import Footer from './components/Footer';
 
 export default {
   name: 'App',
   components: {
     Header,
-    Tasks,
-    AddTask,
+    Footer,
   },
   data() {
     return {
-      tasks: [],
       showAddTask: false
     }
   },
   methods: {
-    addTask(newTask) {
-      this.tasks = [...this.tasks, newTask]
-    },
-    deleteTask(id) {
-      if (confirm('Are you sure?')) {
-        this.tasks = this.tasks.filter((task) => task.id !== id)
-      }
-    },
-    toggleReminder(id) {
-      this.tasks = this.tasks.map((task) => task.id === id ? {...task, reminder: !task.reminder} : task)
-    },
     toggleAddTask() {
       this.showAddTask = !this.showAddTask;
     },
-    async fetchTasks() {
-      const res = await fetch('api/tasks')
-      const data = await res.json()
-      return data;
-    },
-    async fetchSingleTask(id) {
-      const res = await fetch(`api/tasks/${id}`)
-      const data = await res.json()
-      return data;
-    }
-  },
-  async created() {
-    const data = await this.fetchTasks()
-    this.tasks = data;
   }
 }
 </script>
